@@ -1,0 +1,18 @@
+// Notification bell component styles
+.notification-dropdown {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f9fafb;
+}
+
+.unread-notification {
+  background-color: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}

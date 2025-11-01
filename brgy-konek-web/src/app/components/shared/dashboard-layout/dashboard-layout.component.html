@@ -1,0 +1,167 @@
+<div class="dashboard-layout min-h-screen flex">
+  <!-- Mobile Overlay -->
+  <div
+    *ngIf="sidebarOpen"
+    class="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+    (click)="toggleSidebar()"
+  ></div>
+
+  <!-- Sidebar -->
+  <div
+    class="sidebar bg-cover bg-center text-white transition-all duration-300 fixed top-0 left-0 h-screen z-30 flex flex-col"
+    [ngClass]="{
+      'w-64': sidebarOpen,
+      'w-16': !sidebarOpen,
+      'hidden lg:flex': !sidebarOpen,
+      'flex': sidebarOpen
+    }"
+    style="background-image: url('assets/images/splash-bg.png')"
+  >
+    <div class="sidebar-overlay absolute inset-0 z-0"></div>
+    
+    <!-- Sidebar Header -->
+    <div class="relative z-10 p-4 border-b border-white border-opacity-20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3" *ngIf="sidebarOpen">
+          <img
+            src="assets/images/brand-logo.png"
+            alt="Brand Logo"
+            class="h-8 w-8"
+          />
+          <span class="font-bold text-lg">Dashboard</span>
+        </div>
+        <button
+          (click)="toggleSidebar()"
+          class="p-2 rounded-md hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+        >
+          <ng-icon *ngIf="sidebarOpen" name="heroXMark" class="w-5 h-5"></ng-icon>
+          <ng-icon *ngIf="!sidebarOpen" name="heroBars3" class="w-5 h-5"></ng-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="flex-1 relative z-10 p-4">
+      <ul class="space-y-2" *ngIf="sidebarOpen">
+        <li
+          *ngFor="let link of sidebarLinks"
+          (click)="goToSidebarLink(link)"
+          class="hover:bg-white hover:bg-opacity-10 cursor-pointer rounded-lg p-3 transition-colors duration-200"
+        >
+          <div class="flex items-center gap-3">
+            <ng-icon [name]="link.icon" class="w-5 h-5"></ng-icon>
+            <span class="text-sm font-medium">{{ link.label }}</span>
+          </div>
+        </li>
+      </ul>
+      
+      <!-- Collapsed sidebar icons -->
+      <div *ngIf="!sidebarOpen" class="flex flex-col items-center space-y-4">
+        <div
+          *ngFor="let link of sidebarLinks"
+          (click)="goToSidebarLink(link)"
+          class="p-2 rounded-lg hover:bg-white hover:bg-opacity-10 cursor-pointer transition-colors duration-200"
+          [title]="link.label"
+        >
+          <ng-icon [name]="link.icon" class="w-5 h-5"></ng-icon>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Content Area -->
+  <div
+    class="flex-1 flex flex-col transition-all duration-300"
+    [ngClass]="{
+      'lg:ml-64': sidebarOpen,
+      'lg:ml-16': !sidebarOpen,
+      'ml-0': true
+    }"
+  >
+    <!-- Top Navigation -->
+    <nav
+      class="navbar bg-white shadow h-16 flex items-center px-4 sm:px-6 justify-between fixed top-0 right-0 z-20"
+      [ngClass]="{
+        'w-[calc(100%-16rem)]': sidebarOpen,
+        'w-[calc(100%-4rem)]': !sidebarOpen,
+        'w-full lg:w-[calc(100%-16rem)] lg:sidebar-open': sidebarOpen,
+        'w-full lg:w-[calc(100%-4rem)] lg:sidebar-closed': !sidebarOpen
+      }"
+      style="left: auto"
+    >
+      <!-- Mobile Menu Button -->
+      <button
+        (click)="toggleSidebar()"
+        class="lg:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      >
+        <ng-icon name="heroBars3" class="w-6 h-6 text-gray-600"></ng-icon>
+      </button>
+      
+      <span class="font-semibold text-gray-700 text-sm sm:text-base hidden sm:block">Web Dashboard v1.0.0</span>
+      
+      <div class="flex items-center space-x-2 sm:space-x-4">
+        <app-notification-bell></app-notification-bell>
+        <button
+          (click)="openLogoutConfirmation()"
+          class="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center gap-1 sm:gap-2 text-sm sm:text-base"
+        >
+          <ng-icon name="heroArrowRightOnRectangle" class="w-4 h-4 sm:w-5 sm:h-5"></ng-icon>
+          <span class="hidden sm:inline">Logout</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main
+      class="flex-1 p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto mt-16"
+      style="height: calc(100vh - 4rem)"
+    >
+      <!-- Breadcrumbs -->
+      <nav
+        *ngIf="breadcrumbs.length"
+        class="mb-4 flex items-center text-xs sm:text-sm text-gray-600 space-x-1 sm:space-x-2 overflow-x-auto"
+      >
+        <ng-container
+          *ngFor="let breadcrumb of breadcrumbs; let i = index; let last = last"
+        >
+          <span *ngIf="i === 0" class="whitespace-nowrap">{{ breadcrumb.label }}</span>
+          <a
+            *ngIf="i === 1"
+            [routerLink]="breadcrumb.url"
+            class="hover:underline whitespace-nowrap"
+            >{{ breadcrumb.label }}</a
+          >
+          <a
+            *ngIf="i > 1 && !last"
+            [routerLink]="breadcrumb.url"
+            class="hover:underline whitespace-nowrap"
+            >{{ breadcrumb.label }}</a
+          >
+          <span *ngIf="i > 1 && last" class="whitespace-nowrap">{{ breadcrumb.label }}</span>
+          <span *ngIf="!last" class="mx-1">/</span>
+        </ng-container>
+      </nav>
+
+      <!-- Page Header -->
+      <div *ngIf="title || subtitle" class="mb-4 sm:mb-6">
+        <h1 *ngIf="title" class="text-xl sm:text-2xl font-medium text-gray-800 mb-1">
+          {{ title }}
+        </h1>
+        <p *ngIf="subtitle" class="text-sm sm:text-base text-gray-500">{{ subtitle }}</p>
+      </div>
+
+      <!-- Page Content -->
+      <ng-content></ng-content>
+    </main>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <app-confirm-delete-modal
+    [visible]="showLogoutConfirmationModal"
+    title="Confirm Logout"
+    message="Are you sure you want to logout?"
+    confirmButtonText="Logout"
+    (cancel)="onLogoutCancelled()"
+    (confirm)="onLogoutConfirmed()"
+  ></app-confirm-delete-modal>
+</div>

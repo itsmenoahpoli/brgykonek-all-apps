@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular
+dist/
+.angular/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Environment files (will be set via Railway env vars)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Documentation
+*.md
+!README.md
+
+# Build files
+*.log
+coverage/
+
+# Temporary files
+tmp/
+temp/

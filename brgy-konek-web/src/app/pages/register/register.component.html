@@ -1,0 +1,550 @@
+<app-auth-layout
+  title="Create your account"
+  subtitle="Join BrgyKonek to connect with your community"
+>
+  <form class="space-y-4 sm:space-y-6" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label
+          for="first_name"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >First Name</label
+        >
+        <input
+          id="first_name"
+          type="text"
+          formControlName="first_name"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          [class.border-red-500]="
+            registerForm.get('first_name')?.invalid &&
+            registerForm.get('first_name')?.touched
+          "
+        />
+        <div
+          *ngIf="
+            registerForm.get('first_name')?.invalid &&
+            registerForm.get('first_name')?.touched
+          "
+          class="text-red-500 text-xs mt-1"
+        >
+          First name is required and must be at least 2 characters
+        </div>
+      </div>
+
+      <div>
+        <label
+          for="middle_name"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Middle Name</label
+        >
+        <input
+          id="middle_name"
+          type="text"
+          formControlName="middle_name"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      </div>
+
+      <div>
+        <label
+          for="last_name"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Last Name</label
+        >
+        <input
+          id="last_name"
+          type="text"
+          formControlName="last_name"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          [class.border-red-500]="
+            registerForm.get('last_name')?.invalid &&
+            registerForm.get('last_name')?.touched
+          "
+        />
+        <div
+          *ngIf="
+            registerForm.get('last_name')?.invalid &&
+            registerForm.get('last_name')?.touched
+          "
+          class="text-red-500 text-xs mt-1"
+        >
+          Last name is required and must be at least 2 characters
+        </div>
+      </div>
+
+      <div>
+        <label for="birthdate" class="block text-sm font-medium text-gray-700 mb-1"
+          >Birthdate</label
+        >
+        <input
+          id="birthdate"
+          type="date"
+          formControlName="birthdate"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          [class.border-red-500]="
+            registerForm.get('birthdate')?.invalid &&
+            registerForm.get('birthdate')?.touched
+          "
+        />
+        <div
+          *ngIf="
+            registerForm.get('birthdate')?.invalid &&
+            registerForm.get('birthdate')?.touched
+          "
+          class="text-red-500 text-xs mt-1"
+        >
+          Birthdate is required
+        </div>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-1"
+          >Email Address</label
+        >
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+          [class.border-red-500]="
+            registerForm.get('email')?.invalid &&
+            registerForm.get('email')?.touched
+          "
+        />
+        <div
+          *ngIf="
+            registerForm.get('email')?.invalid &&
+            registerForm.get('email')?.touched
+          "
+          class="text-red-500 text-xs mt-1"
+        >
+          <div *ngIf="registerForm.get('email')?.errors?.['email']">
+            Please enter a valid email address
+          </div>
+          <div *ngIf="registerForm.get('email')?.errors?.['gmailOnly']">
+            Only Gmail addresses are allowed (example&#64;gmail.com)
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label
+          for="password"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Password</label
+        >
+        <div class="relative">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10"
+            [class.border-red-500]="
+              registerForm.get('password')?.invalid &&
+              registerForm.get('password')?.touched
+            "
+          />
+          <button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            class="absolute inset-y-0 right-0 flex items-center px-3 focus:outline-none"
+          >
+            <svg
+              *ngIf="!showPassword"
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-.274.832-.67 1.613-1.176 2.318M15.54 17.44A9.956 9.956 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.042-3.338"
+              />
+            </svg>
+            <svg
+              *ngIf="showPassword"
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a9.956 9.956 0 012.042-3.338m1.664-2.486A9.956 9.956 0 0112 5c4.477 0 8.268 2.943 9.542 7a9.965 9.965 0 01-4.293 5.411M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 3l18 18"
+              />
+            </svg>
+          </button>
+        </div>
+        <ul class="mt-2 space-y-1 text-xs">
+          <li
+            [class.text-green-600]="passwordValidationStatus.length"
+            [class.text-red-500]="!passwordValidationStatus.length"
+          >
+            Minimum 8 and maximum 20 characters
+          </li>
+          <li
+            [class.text-green-600]="passwordValidationStatus.uppercase"
+            [class.text-red-500]="!passwordValidationStatus.uppercase"
+          >
+            At least one uppercase letter
+          </li>
+          <li
+            [class.text-green-600]="passwordValidationStatus.lowercase"
+            [class.text-red-500]="!passwordValidationStatus.lowercase"
+          >
+            At least one lowercase letter
+          </li>
+          <li
+            [class.text-green-600]="passwordValidationStatus.number"
+            [class.text-red-500]="!passwordValidationStatus.number"
+          >
+            At least one number
+          </li>
+          <li
+            [class.text-green-600]="passwordValidationStatus.special"
+            [class.text-red-500]="!passwordValidationStatus.special"
+          >
+            At least one special character (!&#64;#$%^&*)
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <label
+          for="confirmPassword"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Confirm Password</label
+        >
+        <div class="relative">
+          <input
+            id="confirmPassword"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="confirmPassword"
+            class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            [class.border-red-500]="
+              registerForm.get('confirmPassword')?.invalid &&
+              registerForm.get('confirmPassword')?.touched
+            "
+          />
+        </div>
+        <div
+          *ngIf="
+            registerForm.get('confirmPassword')?.invalid &&
+            registerForm.get('confirmPassword')?.touched
+          "
+          class="text-red-500 text-xs mt-1"
+        >
+          <span
+            *ngIf="registerForm.get('confirmPassword')?.errors?.['required']"
+            >Please confirm your password</span
+          >
+          <span
+            *ngIf="registerForm.get('confirmPassword')?.errors?.['passwordMismatch']"
+            >Passwords do not match</span
+          >
+        </div>
+      </div>
+
+      <div>
+        <label for="province" class="block text-sm font-medium text-gray-700 mb-1"
+          >Province</label
+        >
+        <input
+          id="province"
+          type="text"
+          formControlName="province"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100"
+          readonly
+        />
+      </div>
+
+      <div>
+        <label for="municipality" class="block text-sm font-medium text-gray-700 mb-1"
+          >Municipality</label
+        >
+        <input
+          id="municipality"
+          type="text"
+          formControlName="municipality"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100"
+          readonly
+        />
+      </div>
+
+      <div>
+        <label for="barangay" class="block text-sm font-medium text-gray-700 mb-1"
+          >Barangay</label
+        >
+        <input
+          id="barangay"
+          type="text"
+          formControlName="barangay"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-100"
+          readonly
+        />
+      </div>
+
+      <div>
+        <label for="sitio" class="block text-sm font-medium text-gray-700 mb-1"
+          >Sitio/Purok</label
+        >
+        <select
+          id="sitio"
+          formControlName="sitio"
+          class="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          [class.border-red-500]="
+            registerForm.get('sitio')?.invalid &&
+            registerForm.get('sitio')?.touched
+          "
+        >
+          <option value="">Select Sitio</option>
+          <option value="Maharlika">Maharlika</option>
+          <option value="Pilar Village">Pilar Village</option>
+          <option value="Happy Village">Happy Village</option>
+          <option value="Centro">Centro</option>
+          <option value="Sagana">Sagana</option>
+          <option value="Crotinda">Crotinda</option>
+          <option value="Aplaya">Aplaya</option>
+        </select>
+        <div
+          *ngIf="
+            registerForm.get('sitio')?.invalid &&
+            registerForm.get('sitio')?.touched
+          "
+          class="text-red-500 text-xs mt-1"
+        >
+          Sitio/Purok is required
+        </div>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label
+          for="mobile_number"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Mobile Number</label
+        >
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 select-none">+639</span>
+          <input
+            id="mobile_number"
+            type="tel"
+            [value]="getMobileDisplay()"
+            (input)="onMobileInput($event)"
+            class="block w-full border border-gray-300 rounded-md pl-12 pr-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+            placeholder="XXXXXXXXX"
+            [class.border-red-500]="
+              registerForm.get('mobile_number')?.invalid &&
+              registerForm.get('mobile_number')?.touched
+            "
+          />
+        </div>
+        <div
+          *ngIf="
+            registerForm.get('mobile_number')?.invalid &&
+            registerForm.get('mobile_number')?.touched
+          "
+          class="text-red-500 text-xs mt-1"
+        >
+          <div *ngIf="registerForm.get('mobile_number')?.errors?.['required']">
+            Mobile number is required
+          </div>
+          <div
+            *ngIf="registerForm.get('mobile_number')?.errors?.['philippineMobile']"
+          >
+            Please enter a valid Philippine mobile number (e.g., +639123456789)
+          </div>
+        </div>
+      </div>
+
+      <div class="sm:col-span-2">
+        <label
+          for="barangay_clearance"
+          class="block text-sm font-medium text-gray-700 mb-1"
+          >Barangay Clearance</label
+        >
+        <div
+          class="relative border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-indigo-400 transition-colors duration-200"
+          [class.border-red-500]="
+            registerForm.get('barangay_clearance')?.invalid &&
+            registerForm.get('barangay_clearance')?.touched
+          "
+          [class.border-indigo-500]="isDragOver"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="fileInput.click()"
+        >
+          <input
+            #fileInput
+            id="barangay_clearance"
+            type="file"
+            formControlName="barangay_clearance"
+            accept="image/*,.pdf"
+            class="hidden"
+            (change)="onFileSelected($event)"
+          />
+
+          <div class="space-y-3">
+            <div class="flex justify-center">
+              <svg
+                class="w-12 h-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                ></path>
+              </svg>
+            </div>
+
+            <div>
+              <p class="text-sm font-medium text-gray-700">
+                <span
+                  class="text-indigo-600 hover:text-indigo-500 cursor-pointer"
+                  >Click to upload</span
+                >
+                or drag and drop
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                JPG, PNG, GIF, PDF up to 5MB (Optional)
+              </p>
+            </div>
+
+            <div *ngIf="selectedFileName" class="mt-3">
+              <div
+                class="flex items-center justify-center space-x-2 bg-green-50 border border-green-200 rounded-md p-2"
+              >
+                <svg
+                  class="w-5 h-5 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                <span class="text-sm text-green-700 font-medium">{{
+                  selectedFileName
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          *ngIf="
+            registerForm.get('barangay_clearance')?.invalid &&
+            registerForm.get('barangay_clearance')?.touched
+          "
+          class="text-red-500 text-xs mt-2"
+        >
+          <span
+            *ngIf="registerForm.get('barangay_clearance')?.errors?.['fileType']"
+            >Please upload only image or PDF files</span
+          >
+          <span
+            *ngIf="registerForm.get('barangay_clearance')?.errors?.['fileSize']"
+            >File size must be less than 5MB</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <input id="remember_device" type="checkbox" formControlName="rememberDevice" class="h-4 w-4 text-indigo-600 border-gray-300 rounded" />
+      <label for="remember_device" class="text-xs sm:text-sm text-gray-700">Remember this device for 30 days</label>
+    </div>
+
+    <div
+      *ngIf="errorMessage"
+      class="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded relative text-sm"
+    >
+      {{ errorMessage }}
+    </div>
+
+    <div>
+      <button
+        type="submit"
+        [disabled]="registerForm.invalid || isLoading"
+        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span
+          *ngIf="isLoading"
+          class="absolute left-0 inset-y-0 flex items-center pl-3"
+        >
+          <svg
+            class="animate-spin h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        </span>
+        {{ isLoading ? "Creating account..." : "Create account" }}
+      </button>
+    </div>
+
+    <div class="text-center">
+      <p class="text-xs sm:text-sm text-gray-600">
+        Already have an account?
+        <button
+          type="button"
+          (click)="goToLogin()"
+          class="font-medium text-indigo-600 hover:text-indigo-500"
+        >
+          Sign in here
+        </button>
+      </p>
+    </div>
+
+  </form>
+
+  <app-status-modal
+    [isVisible]="showSuccessDialog"
+    type="success"
+    title="Registration Successful!"
+    message="Your account has been created successfully. You will be redirected to the login page in a few seconds."
+    [autoCloseDelay]="2000"
+    (modalClosed)="showSuccessDialog = false"
+  ></app-status-modal>
+</app-auth-layout>

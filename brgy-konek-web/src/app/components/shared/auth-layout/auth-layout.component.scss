@@ -1,0 +1,238 @@
+.auth-layout {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("/splash-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+.content {
+  position: relative;
+  z-index: 3;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 600px;
+  max-height: 90vh;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.left-column {
+  flex: 1;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  color: white;
+  text-align: center;
+}
+
+.logo-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.brand-logo {
+  max-width: 120px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.brgykonek-text {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.brgy {
+  color: #ffffff;
+}
+
+.konek {
+  color: #fbbf24;
+}
+
+.app-description {
+  max-width: 300px;
+}
+
+.app-tagline {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #ffffff;
+}
+
+.app-description-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #e5e7eb;
+  margin: 0;
+}
+
+.right-column {
+  flex: 1.2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 500px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.auth-subtitle {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.auth-body {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.desktop-only {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .auth-card {
+    flex-direction: column;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    overflow-y: auto;
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .left-column {
+    padding: 1rem;
+    flex: 0 0 auto;
+    min-height: 120px;
+  }
+
+  .right-column {
+    padding: 1.5rem;
+    flex: 1;
+    align-items: stretch;
+  }
+
+  .auth-container {
+    max-width: 100%;
+    min-height: auto;
+  }
+
+  .auth-body {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .logo-stack {
+    margin-bottom: 0;
+  }
+
+  .brand-logo {
+    max-width: 80px;
+  }
+
+  .auth-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 0;
+  }
+
+  .auth-card {
+    border-radius: 0;
+  }
+
+  .left-column {
+    padding: 0.75rem;
+    min-height: 100px;
+  }
+
+  .right-column {
+    padding: 1rem;
+  }
+
+  .brand-logo {
+    max-width: 70px;
+  }
+}

@@ -1,0 +1,73 @@
+<app-dashboard-layout>
+  <div class="space-y-6">
+    <!-- Pending Approval Message -->
+    <div *ngIf="isPendingApproval" class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-2 sm:ml-3">
+          <h3 class="text-xs sm:text-sm font-medium text-yellow-800">Account Pending Approval</h3>
+          <div class="mt-1 sm:mt-2 text-xs sm:text-sm text-yellow-700">
+            <p>Your account is currently pending approval from the barangay administration. You will receive an email notification once your account has been reviewed and approved.</p>
+            <p class="mt-1">In the meantime, you can still view announcements and access basic information.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">Welcome to Your Dashboard</h1>
+      <p class="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base">Stay connected with your community and access services easily.</p>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div class="bg-blue-50 rounded-lg p-3 sm:p-4 border border-blue-200">
+          <div class="flex items-center">
+            <div class="p-1.5 sm:p-2 bg-blue-500 rounded-lg">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-2 sm:ml-3">
+              <p class="text-xs sm:text-sm font-medium text-blue-900">Pending Complaints</p>
+              <p class="text-xl sm:text-2xl font-bold text-blue-600">{{ isLoading ? '...' : dashboardStats.pendingComplaints }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-green-50 rounded-lg p-3 sm:p-4 border border-green-200">
+          <div class="flex items-center">
+            <div class="p-1.5 sm:p-2 bg-green-500 rounded-lg">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="ml-2 sm:ml-3">
+              <p class="text-xs sm:text-sm font-medium text-green-900">Resolved Complaints</p>
+              <p class="text-xl sm:text-2xl font-bold text-green-600">{{ isLoading ? '...' : dashboardStats.resolvedComplaints }}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-yellow-50 rounded-lg p-3 sm:p-4 border border-yellow-200">
+          <div class="flex items-center">
+            <div class="p-1.5 sm:p-2 bg-yellow-500 rounded-lg">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828z"></path>
+              </svg>
+            </div>
+            <div class="ml-2 sm:ml-3">
+              <p class="text-xs sm:text-sm font-medium text-yellow-900">Document Requests</p>
+              <p class="text-xl sm:text-2xl font-bold text-yellow-600">{{ isLoading ? '...' : dashboardStats.documentRequests }}</p>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+
+  </div>
+</app-dashboard-layout>

@@ -1,0 +1,220 @@
+<header
+  class="fixed top-0 left-0 w-full bg-white flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 z-50 border-b border-blue-100"
+>
+  <div class="flex items-center">
+    <span class="font-bold text-lg sm:text-2xl text-blue-700">BRGY</span>
+    <span class="font-bold text-lg sm:text-2xl text-red-600 ml-1">KONEK</span>
+  </div>
+  
+  <!-- Desktop Navigation -->
+  <nav class="hidden md:flex gap-6 lg:gap-10">
+    <button
+      class="font-bold text-sm lg:text-base text-black hover:text-red-600 transition-colors"
+      (click)="goHome()"
+    >
+      HOME
+    </button>
+    <button
+      class="font-bold text-sm lg:text-base text-black hover:text-red-600 transition-colors"
+      (click)="goContact()"
+    >
+      CONTACT
+    </button>
+    <button
+      class="font-bold text-sm lg:text-base text-black hover:text-red-600 transition-colors"
+      (click)="goServices()"
+    >
+      SERVICES
+    </button>
+    <button
+      class="font-bold text-sm lg:text-base text-black hover:text-red-600 transition-colors cursor-pointer"
+      (click)="goLogin()"
+    >
+      LOGIN
+    </button>
+  </nav>
+
+  <!-- Mobile Menu Button -->
+  <button
+    (click)="toggleMobileMenu()"
+    class="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  >
+    <ng-icon *ngIf="!mobileMenuOpen" name="heroBars3" class="w-6 h-6 text-gray-600"></ng-icon>
+    <ng-icon *ngIf="mobileMenuOpen" name="heroXMark" class="w-6 h-6 text-gray-600"></ng-icon>
+  </button>
+</header>
+
+<!-- Mobile Menu -->
+<div
+  *ngIf="mobileMenuOpen"
+  class="fixed top-16 left-0 right-0 bg-white border-b border-blue-100 shadow-lg z-40 md:hidden"
+>
+  <nav class="flex flex-col py-4">
+    <button
+      class="px-4 py-3 text-left font-bold text-base text-black hover:text-red-600 hover:bg-gray-50 transition-colors"
+      (click)="goHome(); mobileMenuOpen = false"
+    >
+      HOME
+    </button>
+    <button
+      class="px-4 py-3 text-left font-bold text-base text-black hover:text-red-600 hover:bg-gray-50 transition-colors"
+      (click)="goContact(); mobileMenuOpen = false"
+    >
+      CONTACT
+    </button>
+    <button
+      class="px-4 py-3 text-left font-bold text-base text-black hover:text-red-600 hover:bg-gray-50 transition-colors"
+      (click)="goServices(); mobileMenuOpen = false"
+    >
+      SERVICES
+    </button>
+    <button
+      class="px-4 py-3 text-left font-bold text-base text-black hover:text-red-600 hover:bg-gray-50 transition-colors"
+      (click)="goLogin(); mobileMenuOpen = false"
+    >
+      LOGIN
+    </button>
+  </nav>
+</div>
+
+<!-- Mobile Menu Overlay -->
+<div
+  *ngIf="mobileMenuOpen"
+  class="fixed inset-0 bg-black bg-opacity-25 z-30 md:hidden"
+  (click)="mobileMenuOpen = false"
+></div>
+<div>
+  <ng-content></ng-content>
+</div>
+<footer class="bg-[#2c3846] text-white w-full mt-16">
+  <div
+    class="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-10 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
+  >
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center gap-2">
+        <img
+          src="/assets/images/brand-logo.png"
+          alt="logo"
+          class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white"
+        />
+        <div>
+          <div class="font-bold text-base sm:text-lg">Barangay Masaguisi</div>
+          <div class="text-xs text-gray-300">Community Management System</div>
+        </div>
+      </div>
+      <div class="text-sm text-gray-300 leading-snug">
+        Serving our community with dedication, transparency, and excellence
+        since 1986.
+      </div>
+      <div class="flex gap-3 mt-2">
+        <a
+          href="https://facebook.com/barangaymasaguisi"
+          target="_blank"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-[#232e3a] hover:bg-blue-600 transition"
+          ><svg fill="currentColor" viewBox="0 0 24 24" class="w-4 h-4 sm:w-5 sm:h-5">
+            <path
+              d="M21.35 11.1c0-5.05-4.1-9.15-9.15-9.15S3.05 6.05 3.05 11.1c0 4.54 3.3 8.3 7.65 9.06v-6.41h-2.3v-2.65h2.3V9.41c0-2.27 1.36-3.53 3.44-3.53.99 0 2.03.18 2.03.18v2.23h-1.14c-1.13 0-1.48.7-1.48 1.42v1.7h2.52l-.4 2.65h-2.12v6.41c4.35-.76 7.65-4.52 7.65-9.06z"
+            /></svg
+        ></a>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2">
+      <div class="font-bold text-base mb-2">Quick Links</div>
+      <a (click)="goHome()" class="hover:underline text-sm cursor-pointer">Home</a>
+      <a (click)="goServices()" class="hover:underline text-sm cursor-pointer">Services</a>
+      <a (click)="goContact()" class="hover:underline text-sm cursor-pointer">Contact</a>
+      <a (click)="goAnnouncements()" class="hover:underline text-sm cursor-pointer">Announcements</a>
+      <a (click)="goLogin()" class="hover:underline text-sm cursor-pointer">File a Complaint</a>
+    </div>
+    <div class="flex flex-col gap-2">
+      <div class="font-bold text-base mb-2">Contact Information</div>
+      <div class="flex items-start gap-2 text-xs sm:text-sm">
+        <svg
+          class="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M17.657 16.657L13.414 20.9a2 2 0 0 1-2.828 0l-4.243-4.243a8 8 0 1 1 11.314 0z"
+          />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"
+          /></svg
+        ><span class="break-words">Masaguisi, Bongabong, Oriental Mindoro</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs sm:text-sm">
+        <svg
+          class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+          /></svg
+        >(02) 8123-4567
+      </div>
+      <div class="flex items-center gap-2 text-xs sm:text-sm">
+        <svg
+          class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          /></svg
+        ><span class="break-all">masaguisi&#64;barangay.gov.ph</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs sm:text-sm">
+        <svg
+          class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M21.35 11.1c0-5.05-4.1-9.15-9.15-9.15S3.05 6.05 3.05 11.1c0 4.54 3.3 8.3 7.65 9.06v-6.41h-2.3v-2.65h2.3V9.41c0-2.27 1.36-3.53 3.44-3.53.99 0 2.03.18 2.03.18v2.23h-1.14c-1.13 0-1.48.7-1.48 1.42v1.7h2.52l-.4 2.65h-2.12v6.41c4.35-.76 7.65-4.52 7.65-9.06z"
+          /></svg
+        ><span class="break-all">facebook.com/barangaymasaguisi</span>
+      </div>
+      <div class="flex items-center gap-2 text-xs sm:text-sm">
+        <svg
+          class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+          /></svg
+        ><span class="break-words">Monday to Friday: 8:00 AM - 5:00 PM</span>
+      </div>
+    </div>
+  </div>
+  <div class="border-t border-gray-700 mt-8"></div>
+  <div
+    class="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex flex-col md:flex-row items-center justify-between text-xs text-gray-400 gap-4"
+  >
+    <div class="text-center md:text-left">© 2025 Barangay Masaguisi. All rights reserved.</div>
+    <div class="flex flex-wrap gap-2 sm:gap-4 justify-center md:justify-end">
+      <a href="#" class="hover:underline">Privacy Policy</a>
+      <a href="#" class="hover:underline">Terms of Service</a>
+      <a href="#" class="hover:underline">Accessibility</a>
+    </div>
+  </div>
+</footer>

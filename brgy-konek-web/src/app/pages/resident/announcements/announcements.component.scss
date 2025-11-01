@@ -1,0 +1,212 @@
+// Resident Announcements Component Styles - Mobile Responsive
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.announcement-card {
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.announcement-card img {
+  object-position: center;
+}
+
+.announcement-card .p-4 {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-input {
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.status-badge {
+  &.published {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  &.draft {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+}
+
+// Mobile-specific optimizations for better screen fitting
+@media (max-width: 640px) {
+  // Ensure content fits within viewport
+  .mobile-container {
+    padding: 0.5rem;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  .mobile-card {
+    margin-bottom: 0.75rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 0.75rem;
+  }
+  
+  .mobile-card-header {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .mobile-card-content {
+    padding: 0.75rem;
+  }
+  
+  .mobile-button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  .mobile-button {
+    width: 100%;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    border: 1px solid;
+  }
+  
+  // Modal optimizations for mobile
+  .mobile-modal {
+    margin: 0.25rem;
+    max-height: calc(100vh - 0.5rem);
+    overflow-y: auto;
+    width: calc(100vw - 0.5rem);
+  }
+  
+  .mobile-modal-content {
+    padding: 0.75rem;
+  }
+  
+  .mobile-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  
+  // Text optimization for mobile
+  .mobile-text {
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+  
+  .mobile-title {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+}
+
+// Small mobile devices (320px - 480px)
+@media (max-width: 480px) {
+  .mobile-container {
+    padding: 0.25rem;
+  }
+  
+  .mobile-card {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-button {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .mobile-modal {
+    margin: 0.125rem;
+    width: calc(100vw - 0.25rem);
+  }
+}
+
+// Tablet optimizations
+@media (min-width: 641px) and (max-width: 1023px) {
+  .tablet-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .tablet-modal {
+    width: 90vw;
+    max-width: 600px;
+  }
+}
+
+// Ensure proper text wrapping for long content
+.text-wrap {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+// Prevent horizontal scrolling
+.no-scroll-x {
+  overflow-x: hidden;
+}
+
+// Ensure proper viewport handling
+.viewport-fit {
+  width: 100vw;
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+// Light button styles for consistent appearance
+.light-button {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+  transition: all 0.2s ease-in-out;
+}
+
+.light-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+// Compact button spacing
+.compact-buttons {
+  gap: 0.25rem;
+}
+
+.compact-buttons .light-button {
+  padding: 0.25rem 0.375rem;
+  font-size: 0.6875rem;
+}

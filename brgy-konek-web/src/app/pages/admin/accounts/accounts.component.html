@@ -1,0 +1,440 @@
+<app-dashboard-layout>
+  <div class="p-2 sm:p-4 lg:p-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 sm:mb-4 lg:mb-6 gap-3">
+      <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Account Management</h1>
+      <button 
+        class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2 rounded transition-colors duration-200 text-sm w-full sm:w-auto"
+        (click)="openCreateModal()"
+      >
+        Create New Account
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow p-3 sm:p-4 mb-3 sm:mb-4 lg:mb-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="sm:col-span-2 lg:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+          <input 
+            type="text" 
+            class="w-full border rounded px-3 py-2 text-sm" 
+            placeholder="Search by name or email..."
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">User Type</label>
+          <select 
+            class="w-full border rounded px-3 py-2 text-sm" 
+            [(ngModel)]="userTypeFilter"
+            (change)="onFilterChange()"
+          >
+            <option value="all">All Types</option>
+            <option value="staff">Staff</option>
+            <option value="resident">Resident</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select 
+            class="w-full border rounded px-3 py-2 text-sm" 
+            [(ngModel)]="statusFilter"
+            (change)="onFilterChange()"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="flex items-end sm:col-span-2 lg:col-span-1">
+          <button 
+            class="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 px-3 py-2 rounded transition-colors duration-200 text-sm"
+            (click)="searchTerm = ''; userTypeFilter = 'all'; statusFilter = 'all'; applyFilters()"
+          >
+            Clear Filters
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="bg-white rounded-lg shadow p-8">
+      <div class="flex items-center justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <span class="ml-2">Loading users...</span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredUsers.length === 0" class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+      No users found matching your criteria.
+    </div>
+
+    <!-- Desktop Table View (hidden on mobile) -->
+    <div class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let user of filteredUsers" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                      <span class="text-sm font-medium text-white">{{ user.name.charAt(0).toUpperCase() }}</span>
+                    </div>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.email }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full border" 
+                      [class]="getUserTypeClass(user.user_type)">
+                  {{ user.user_type | titlecase }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full border" 
+                      [class]="getStatusClass(user)">
+                  {{ (user.approved !== false && user.status !== 'inactive') ? 'Enabled' : 'Disabled' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ user.createdAt | date:'short' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex flex-col space-y-1">
+                  <button 
+                    class="text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-1 rounded text-xs font-medium transition-colors"
+                    (click)="openEditModal(user)"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    class="text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 px-2 py-1 rounded text-xs font-medium transition-colors"
+                    (click)="toggleUserStatus(user)"
+                  >
+                    {{ (user.approved !== false && user.status !== 'inactive') ? 'Disable' : 'Enable' }}
+                  </button>
+                  <button 
+                    class="text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-2 py-1 rounded text-xs font-medium transition-colors"
+                    (click)="openDeleteModal(user)"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile Card View (visible on mobile and tablet) -->
+    <div class="lg:hidden space-y-3">
+      <div *ngFor="let user of filteredUsers" class="bg-white rounded-lg shadow p-3">
+        <!-- User Header -->
+        <div class="flex items-center space-x-3 mb-3">
+          <div class="flex-shrink-0 h-10 w-10">
+            <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+              <span class="text-sm font-medium text-white">{{ user.name.charAt(0).toUpperCase() }}</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base font-medium text-gray-900 truncate">{{ user.name }}</h3>
+            <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
+          </div>
+        </div>
+
+        <!-- User Details Grid -->
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</p>
+            <span class="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full border mt-1" 
+                  [class]="getUserTypeClass(user.user_type)">
+              {{ user.user_type | titlecase }}
+            </span>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</p>
+            <span class="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full border mt-1" 
+                  [class]="getStatusClass(user)">
+              {{ (user.approved !== false && user.status !== 'inactive') ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Created</p>
+            <p class="text-xs text-gray-900 mt-1">{{ user.createdAt | date:'short' }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Email</p>
+            <p class="text-xs text-gray-900 mt-1 truncate">{{ user.email }}</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+          <div class="flex space-x-2">
+            <button 
+              class="flex-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-2 py-1.5 rounded text-xs font-medium transition-colors"
+              (click)="openEditModal(user)"
+            >
+              Edit
+            </button>
+            <button 
+              class="flex-1 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 px-2 py-1.5 rounded text-xs font-medium transition-colors"
+              (click)="toggleUserStatus(user)"
+            >
+              {{ (user.approved !== false && user.status !== 'inactive') ? 'Disable' : 'Enable' }}
+            </button>
+            <button 
+              class="flex-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2 py-1.5 rounded text-xs font-medium transition-colors"
+              (click)="openDeleteModal(user)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <app-status-modal
+      [isVisible]="showSuccessModal"
+      [title]="successTitle"
+      [message]="successMessage"
+      (modalClosed)="onSuccessModalClosed()"
+    ></app-status-modal>
+  </div>
+
+  <!-- Create User Modal -->
+  <div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+      <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900">Create New Account</h3>
+      </div>
+      <form (ngSubmit)="createUser()" class="px-4 sm:px-6 py-4 space-y-3 sm:space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input 
+            type="text" 
+            class="w-full border rounded px-3 py-2" 
+            [class.border-red-500]="isFormSubmitted && formErrors.name"
+            [(ngModel)]="createForm.name" 
+            name="name"
+            required
+          />
+          <div *ngIf="isFormSubmitted && formErrors.name" class="mt-1 text-sm text-red-600">
+            {{ formErrors.name }}
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input 
+            type="email" 
+            class="w-full border rounded px-3 py-2" 
+            [class.border-red-500]="isFormSubmitted && formErrors.email"
+            [(ngModel)]="createForm.email" 
+            name="email"
+            required
+          />
+          <div *ngIf="isFormSubmitted && formErrors.email" class="mt-1 text-sm text-red-600">
+            {{ formErrors.email }}
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input 
+            type="password" 
+            class="w-full border rounded px-3 py-2" 
+            [class.border-red-500]="isFormSubmitted && formErrors.password"
+            [(ngModel)]="createForm.password" 
+            name="password"
+            required
+          />
+          <div *ngIf="isFormSubmitted && formErrors.password" class="mt-1 text-sm text-red-600">
+            {{ formErrors.password }}
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">User Type</label>
+          <select 
+            class="w-full border rounded px-3 py-2" 
+            [class.border-red-500]="isFormSubmitted && formErrors.user_type"
+            [(ngModel)]="createForm.user_type" 
+            name="user_type"
+            required
+          >
+            <option value="resident">Resident</option>
+            <option value="staff">Staff</option>
+          </select>
+          <div *ngIf="isFormSubmitted && formErrors.user_type" class="mt-1 text-sm text-red-600">
+            {{ formErrors.user_type }}
+          </div>
+        </div>
+        
+        <div class="flex items-center">
+          <input 
+            type="checkbox" 
+            id="create-active" 
+            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            [(ngModel)]="createForm.is_active" 
+            name="is_active"
+          />
+          <label for="create-active" class="ml-2 block text-sm text-gray-900">
+            Active Account
+          </label>
+        </div>
+      </form>
+      <div class="px-4 sm:px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+        <button 
+          type="button" 
+          class="w-full sm:w-auto px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded text-sm font-medium transition-colors"
+          (click)="closeCreateModal()"
+        >
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="w-full sm:w-auto px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-sm font-medium transition-colors"
+          (click)="createUser()"
+        >
+          Create Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div *ngIf="showEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+      <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900">Edit Account</h3>
+      </div>
+      <form (ngSubmit)="updateUser()" class="px-4 sm:px-6 py-4 space-y-3 sm:space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input 
+            type="text" 
+            class="w-full border rounded px-3 py-2" 
+            [class.border-red-500]="isFormSubmitted && formErrors.name"
+            [(ngModel)]="editForm.name" 
+            name="name"
+            required
+          />
+          <div *ngIf="isFormSubmitted && formErrors.name" class="mt-1 text-sm text-red-600">
+            {{ formErrors.name }}
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input 
+            type="email" 
+            class="w-full border rounded px-3 py-2" 
+            [class.border-red-500]="isFormSubmitted && formErrors.email"
+            [(ngModel)]="editForm.email" 
+            name="email"
+            required
+          />
+          <div *ngIf="isFormSubmitted && formErrors.email" class="mt-1 text-sm text-red-600">
+            {{ formErrors.email }}
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">User Type</label>
+          <select 
+            class="w-full border rounded px-3 py-2" 
+            [class.border-red-500]="isFormSubmitted && formErrors.user_type"
+            [(ngModel)]="editForm.user_type" 
+            name="user_type"
+            required
+          >
+            <option value="resident">Resident</option>
+            <option value="staff">Staff</option>
+          </select>
+          <div *ngIf="isFormSubmitted && formErrors.user_type" class="mt-1 text-sm text-red-600">
+            {{ formErrors.user_type }}
+          </div>
+        </div>
+        
+        <div class="flex items-center">
+          <input 
+            type="checkbox" 
+            id="edit-active" 
+            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+            [(ngModel)]="editForm.is_active" 
+            name="is_active"
+          />
+          <label for="edit-active" class="ml-2 block text-sm text-gray-900">
+            Active Account
+          </label>
+        </div>
+      </form>
+      <div class="px-4 sm:px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+        <button 
+          type="button" 
+          class="w-full sm:w-auto px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded text-sm font-medium transition-colors"
+          (click)="closeEditModal()"
+        >
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="w-full sm:w-auto px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-sm font-medium transition-colors"
+          (click)="updateUser()"
+        >
+          Update Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2 sm:p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+      <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900">Delete Account</h3>
+      </div>
+      <div class="px-4 sm:px-6 py-4">
+        <p class="text-sm text-gray-600">
+          Are you sure you want to delete the account for <strong>{{ userToDelete?.name }}</strong>?
+          This action cannot be undone.
+        </p>
+      </div>
+      <div class="px-4 sm:px-6 py-4 bg-gray-50 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+        <button 
+          type="button" 
+          class="w-full sm:w-auto px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded text-sm font-medium transition-colors"
+          (click)="closeDeleteModal()"
+        >
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="w-full sm:w-auto px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded text-sm font-medium transition-colors"
+          (click)="deleteUser()"
+        >
+          Delete Account
+        </button>
+      </div>
+    </div>
+  </div>
+</app-dashboard-layout>

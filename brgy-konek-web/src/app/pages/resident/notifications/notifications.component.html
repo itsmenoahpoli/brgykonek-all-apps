@@ -1,0 +1,163 @@
+<app-dashboard-layout
+  title="Notifications"
+  subtitle="Stay updated with your community activities"
+>
+  <div class="space-y-6">
+    <!-- Filter and Actions -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex items-center gap-4">
+        <label for="filter" class="text-sm font-medium text-gray-700">Filter:</label>
+        <select
+          id="filter"
+          [(ngModel)]="selectedFilter"
+          class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+        >
+          <option value="all">All Notifications</option>
+          <option value="unread">Unread Only</option>
+          <option value="announcement">Announcements</option>
+          <option value="complaint_update">Complaints</option>
+          <option value="document_request_update">Document Requests</option>
+        </select>
+      </div>
+      
+      <button
+        (click)="markAllAsRead()"
+        class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      >
+        Mark All as Read
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828z"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-500">Total Notifications</p>
+            <p class="text-2xl font-semibold text-gray-900">
+              {{ (notifications$ | async)?.length || 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-500">Unread</p>
+            <p class="text-2xl font-semibold text-gray-900">
+              {{ (unreadCount$ | async) || 0 }}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-white rounded-lg shadow p-4">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm font-medium text-gray-500">Document Requests</p>
+            <p class="text-2xl font-semibold text-gray-900">
+              {{ getDocumentRequestCount() }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="bg-white rounded-lg shadow">
+      <ng-container *ngIf="(notifications$ | async) as notifications">
+        <div *ngIf="getFilteredNotifications(notifications).length === 0" class="p-8 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828z"></path>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">No notifications</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            {{ selectedFilter === 'unread' ? 'You have no unread notifications.' : 'You have no notifications yet.' }}
+          </p>
+        </div>
+
+        <div *ngIf="getFilteredNotifications(notifications).length > 0" class="divide-y divide-gray-200">
+          <div
+            *ngFor="let notification of getFilteredNotifications(notifications); trackBy: trackByNotificationId"
+            (click)="handleNotificationClick(notification)"
+            class="p-6 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+            [class.bg-blue-50]="!notification.read"
+            [class.border-l-4]="!notification.read"
+            [class.border-indigo-500]="!notification.read"
+          >
+            <div class="flex items-start space-x-4">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                  <svg
+                    class="h-6 w-6"
+                    [class]="getNotificationColor(notification.type)"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      [attr.d]="getNotificationIcon(notification.type)"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-2">
+                    <p class="text-sm font-medium text-gray-900">
+                      {{ notification.title }}
+                    </p>
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                      [class]="getNotificationColor(notification.type).replace('text-', 'bg-').replace('-600', '-100') + ' ' + getNotificationColor(notification.type)"
+                    >
+                      {{ getNotificationTypeLabel(notification.type) }}
+                    </span>
+                  </div>
+                  
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xs text-gray-500">
+                      {{ notification.created_at | date:'short' }}
+                    </span>
+                    <div *ngIf="!notification.read" class="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                  </div>
+                </div>
+                
+                <p class="mt-1 text-sm text-gray-600">
+                  {{ notification.message }}
+                </p>
+                
+                <div *ngIf="notification.payload" class="mt-2 text-xs text-gray-500">
+                  <span *ngIf="notification.payload['complaintId']">Complaint #{{ notification.payload['complaintId'] }}</span>
+                  <span *ngIf="notification.payload['documentType']">Document: {{ notification.payload['documentType'] }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    
+  </div>
+</app-dashboard-layout>

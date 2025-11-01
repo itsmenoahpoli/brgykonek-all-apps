@@ -1,0 +1,96 @@
+<div class="relative">
+  <button
+    (click)="toggleDropdown()"
+    class="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-full"
+  >
+    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z"></path>
+    </svg>
+    
+    <!-- Unread count badge -->
+    <div *ngIf="(unreadCount$ | async) as unreadCount" class="absolute -top-1 -right-1">
+      <span *ngIf="unreadCount > 0" class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        {{ unreadCount > 99 ? '99+' : unreadCount }}
+      </span>
+    </div>
+  </button>
+
+  <!-- Dropdown -->
+  <div
+    *ngIf="showDropdown"
+    class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="py-1">
+      <!-- Header -->
+      <div class="px-4 py-2 border-b border-gray-200 flex justify-between items-center">
+        <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
+        <button
+          (click)="markAllAsRead()"
+          class="text-xs text-indigo-600 hover:text-indigo-800"
+        >
+          Mark all as read
+        </button>
+      </div>
+
+      <!-- Notifications list -->
+      <div class="max-h-96 overflow-y-auto">
+        <ng-container *ngIf="(notifications$ | async) as notifications">
+          <div *ngIf="notifications.length === 0" class="px-4 py-3 text-sm text-gray-500 text-center">
+            No notifications
+          </div>
+          
+          <div
+            *ngFor="let notification of notifications; trackBy: trackByNotificationId"
+            (click)="handleNotificationClick(notification)"
+            class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+            [class.bg-blue-50]="!notification.read"
+          >
+            <div class="flex items-start space-x-3">
+              <div class="flex-shrink-0">
+                <svg
+                  class="h-5 w-5"
+                  [class]="getNotificationColor(notification.type)"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    [attr.d]="getNotificationIcon(notification.type)"
+                  ></path>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">
+                  {{ notification.title }}
+                </p>
+                <p class="text-sm text-gray-500 truncate">
+                  {{ notification.message }}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">
+                  {{ notification.created_at | date:'short' }}
+                </p>
+              </div>
+              <div *ngIf="!notification.read" class="flex-shrink-0">
+                <div class="w-2 h-2 bg-blue-600 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-4 py-2 border-t border-gray-200">
+        <button
+          (click)="showDropdown = false"
+          class="text-sm text-indigo-600 hover:text-indigo-800"
+        >
+          View all notifications
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -281,7 +281,7 @@ router.get("/:id", complaintController.getComplaintById);
  *       404:
  *         description: Complaint not found
  */
-router.put("/:id", complaintController.updateComplaint);
+router.put("/:id", upload.single("resolution_image"), complaintController.updateComplaint);
 
 /**
  * @swagger

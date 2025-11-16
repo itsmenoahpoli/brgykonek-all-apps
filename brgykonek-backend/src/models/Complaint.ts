@@ -64,6 +64,20 @@ const ComplaintSchema = new mongoose.Schema(
       required: false,
       trim: true,
     },
+    resolved_by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
+    resolved_at: {
+      type: Date,
+      required: false,
+    },
+    resolution_image: {
+      type: String,
+      required: false,
+      trim: true,
+    },
   created_by_admin: {
     type: Boolean,
     default: false,

@@ -118,5 +118,73 @@
   </div>
 
   <app-status-modal [isVisible]="profileSuccess" type="success" title="Profile Updated" message="Your profile has been updated successfully." [autoCloseDelay]="2000" (modalClosed)="onProfileSuccessClosed()"></app-status-modal>
+  <app-status-modal [isVisible]="permissionRequestSuccess" type="success" title="Permission Request Submitted" message="Your permission request has been submitted successfully. An administrator will review your request." [autoCloseDelay]="3000" (modalClosed)="onPermissionRequestSuccessClosed()"></app-status-modal>
   <app-status-modal [isVisible]="passwordSuccess" type="success" title="Password Changed" message="Your password has been changed successfully." [autoCloseDelay]="2000" (modalClosed)="onPasswordSuccessClosed()"></app-status-modal>
+
+  <!-- Permission Warning Modal for Residents -->
+  <div
+    *ngIf="showPermissionWarningModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+  >
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="flex-shrink-0">
+          <svg
+            class="w-6 h-6 text-yellow-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">
+          Permission Required
+        </h3>
+      </div>
+      
+      <div class="mb-4">
+        <p class="text-sm text-gray-700 mb-4">
+          As a resident, you need admin permission to update your profile. Please provide a reason for the changes you want to make.
+        </p>
+        
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Reason for Changes <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          [(ngModel)]="permissionReason"
+          class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+          rows="4"
+          placeholder="Please explain why you need to update your profile information..."
+          [class.border-red-500]="!permissionReason || permissionReason.trim() === ''"
+        ></textarea>
+        <p class="text-xs text-gray-500 mt-1">
+          Your request will be reviewed by an administrator.
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-3">
+        <button
+          type="button"
+          (click)="onPermissionWarningCancel()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors duration-200"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onPermissionWarningConfirm()"
+          [disabled]="!permissionReason || permissionReason.trim() === ''"
+          class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Submit Request
+        </button>
+      </div>
+    </div>
+  </div>
 </app-dashboard-layout>

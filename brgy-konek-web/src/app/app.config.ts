@@ -18,6 +18,7 @@ import {
   heroUsers,
   heroXMark,
   heroBars3,
+  heroClipboardDocumentCheck,
 } from '@ng-icons/heroicons/outline';
 import {
   featherCheckCircle,
@@ -50,6 +51,7 @@ export const appConfig: ApplicationConfig = {
       heroUsers,
       heroXMark,
       heroBars3,
+      heroClipboardDocumentCheck,
       featherCheckCircle,
       featherInfo,
       featherAlertTriangle,

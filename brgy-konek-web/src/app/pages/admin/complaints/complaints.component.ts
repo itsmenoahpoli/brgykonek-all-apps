@@ -10,7 +10,8 @@ import {
 import { Observable } from 'rxjs';
 import { DashboardLayoutComponent } from '../../../components/shared/dashboard-layout/dashboard-layout.component';
 import { StatusModalComponent } from '../../../components/shared/status-modal/status-modal.component';
-import { getBaseUrl } from '../../../utils/api.util';
+import { getBaseUrl, getImageUrl as getImageUrlUtil } from '../../../utils/api.util';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-complaints',
@@ -26,6 +27,8 @@ export class ComplaintsComponent implements OnInit {
   showViewModal = false;
   selectedComplaint: Complaint | null = null;
   showCreateModal = false;
+  showResidentModal = false;
+  selectedResident: Resident | null = null;
   showSuccessModal = false;
   successTitle = '';
   successMessage = '';
@@ -37,6 +40,7 @@ export class ComplaintsComponent implements OnInit {
     location_of_incident: '',
     complaint_content: '',
     priority: 'medium' as 'low' | 'medium' | 'high',
+    priority_risk_category: 'medium' as 'low' | 'medium' | 'high' | 'critical',
     status: 'pending',
     sitio: null as number | null,
     attachments: [] as File[],
@@ -63,7 +67,8 @@ export class ComplaintsComponent implements OnInit {
   ];
   constructor(
     private complaintsService: ComplaintsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {}
   async ngOnInit(): Promise<void> {
     const response = await this.complaintsService.getComplaints();
@@ -130,9 +135,14 @@ export class ComplaintsComponent implements OnInit {
     }
   }
   
+  resolutionImage: File | null = null;
+  resolutionImagePreview: string | null = null;
+
   closeViewModal() {
     this.showViewModal = false;
     this.selectedComplaint = null;
+    this.resolutionImage = null;
+    this.resolutionImagePreview = null;
   }
 
   openCreateModal() {
@@ -146,6 +156,7 @@ export class ComplaintsComponent implements OnInit {
       location_of_incident: '',
       complaint_content: '',
       priority: 'medium',
+      priority_risk_category: 'medium',
       status: 'pending',
       sitio: null,
       attachments: [],
@@ -253,7 +264,10 @@ export class ComplaintsComponent implements OnInit {
     formData.append('location_of_incident', this.createForm.location_of_incident);
     formData.append('complaint_content', this.createForm.complaint_content);
     formData.append('status', this.createForm.status);
-    formData.append('priority', this.createForm.priority);
+    // Priority Risk Category updates Priority field
+    const finalPriority = this.createForm.priority_risk_category === 'critical' ? 'high' : this.createForm.priority_risk_category;
+    formData.append('priority', finalPriority);
+    formData.append('priority_risk_category', this.createForm.priority_risk_category);
     if (this.createForm.sitio) {
       formData.append('sitio', this.createForm.sitio.toString());
     }
@@ -273,8 +287,43 @@ export class ComplaintsComponent implements OnInit {
     const isCurrentlyResolved = currentComplaint?.status === 'resolved';
     
     const newStatus = isCurrentlyResolved ? 'pending' : 'resolved';
+    const currentUser = this.authService.getCurrentUser();
     
-    await this.complaintsService.updateComplaint(id, { resolution_note: note, status: newStatus });
+    const updateData: any = {
+      resolution_note: note,
+      status: newStatus
+    };
+    
+    // If marking as resolved, add resolved_by, resolved_at, and resolution_image
+    if (newStatus === 'resolved') {
+      updateData.resolved_by = currentUser?.id || '';
+      updateData.resolved_at = new Date().toISOString();
+    } else {
+      // If reverting, clear resolution data
+      updateData.resolved_by = null;
+      updateData.resolved_at = null;
+      updateData.resolution_image = null;
+    }
+    
+    // If there's a resolution image, upload it via FormData
+    if (this.resolutionImage && newStatus === 'resolved') {
+      const formData = new FormData();
+      formData.append('resolution_note', note);
+      formData.append('status', newStatus);
+      formData.append('resolved_by', currentUser?.id || '');
+      formData.append('resolved_at', new Date().toISOString());
+      formData.append('resolution_image', this.resolutionImage);
+      
+      // Use a different endpoint or method if needed for file upload
+      await this.complaintsService.updateComplaintWithFile(id, formData);
+    } else {
+      await this.complaintsService.updateComplaint(id, updateData);
+    }
+    
+    // Reset resolution image
+    this.resolutionImage = null;
+    this.resolutionImagePreview = null;
+    
     this.showViewModal = false;
     this.selectedComplaint = null;
     
@@ -288,6 +337,23 @@ export class ComplaintsComponent implements OnInit {
     
     this.showSuccessModal = true;
     await this.ngOnInit();
+  }
+
+  onResolutionImageChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.resolutionImage = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.resolutionImagePreview = e.target.result;
+      };
+      reader.readAsDataURL(this.resolutionImage);
+    }
+  }
+
+  removeResolutionImage() {
+    this.resolutionImage = null;
+    this.resolutionImagePreview = null;
   }
 
   async updateComplaintPriority(id: string, priority: 'low' | 'medium' | 'high') {
@@ -320,6 +386,18 @@ export class ComplaintsComponent implements OnInit {
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300';
     }
+  }
+
+  getImageUrl(imagePath: string): string {
+    return getImageUrlUtil(imagePath);
+  }
+
+  getResolvedByName(complaint: Complaint | null): string {
+    if (!complaint?.resolved_by) return 'N/A';
+    if (typeof complaint.resolved_by === 'object' && complaint.resolved_by !== null) {
+      return (complaint.resolved_by as any).name || 'Unknown';
+    }
+    return complaint.resolved_by;
   }
 
   onSuccessModalClosed(): void {
@@ -368,5 +446,29 @@ export class ComplaintsComponent implements OnInit {
       return 'Unknown Resident';
     }
     return complaint.resident_id.name;
+  }
+
+  async openResidentModal(complaint: Complaint) {
+    if (!complaint.resident_id) {
+      return;
+    }
+    
+    // If resident_id is a string, fetch the full resident details
+    if (typeof complaint.resident_id === 'string') {
+      const resident = await this.complaintsService.getResidentById(complaint.resident_id);
+      if (resident) {
+        this.selectedResident = resident;
+        this.showResidentModal = true;
+      }
+    } else {
+      // If it's already a Resident object, use it directly
+      this.selectedResident = complaint.resident_id;
+      this.showResidentModal = true;
+    }
+  }
+
+  closeResidentModal() {
+    this.showResidentModal = false;
+    this.selectedResident = null;
   }
 }

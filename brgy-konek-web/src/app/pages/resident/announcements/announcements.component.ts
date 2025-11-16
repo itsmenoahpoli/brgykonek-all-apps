@@ -41,7 +41,11 @@ export class AnnouncementsComponent {
   }
 
   getImageUrl(imagePath: string): string {
-    return imagePath ? `${environment.baseUrl}${imagePath.charAt(0) === '/' ? imagePath.slice(1) : imagePath}` : '';
+    if (imagePath) {
+      return `${environment.baseUrl}${imagePath.charAt(0) === '/' ? imagePath.slice(1) : imagePath}`;
+    }
+    // Default to brand logo if no image provided
+    return '/brand-logo.png';
   }
 
   get filteredAnnouncements() {

@@ -108,6 +108,10 @@ export class LoginComponent {
     this.router.navigate(['/register']);
   }
 
+  goToLanding(): void {
+    this.router.navigate(['/']);
+  }
+
   onSuccessModalClosed(): void {
     this.showSuccessModal = false;
     const user = this.authService.getCurrentUser();

@@ -65,20 +65,32 @@ const run = async () => {
       for (let i = 0; i < 10; i++) {
         const resident = pick(residents);
         const category = pick(categories);
-        complaintsPerSitio.push({
+        const status = randomStatus();
+        const complaintData: any = {
           resident_id: resident._id,
           title: `${category} at ${sitio.name} #${i + 1}`,
           category,
           date_of_report: randomPastDate(),
           complaint_content: `${category} issue reported in ${sitio.name}.`,
           attachments: [],
-          status: randomStatus(),
+          status,
           priority: randomPriority(),
           sitio_id: sitio._id,
           sitio_code: sitio.code,
           created_at: randomPastDate(),
           updated_at: new Date(),
-        });
+        };
+        
+        // If resolved, add resolution data
+        if (status === 'resolved' && staff.length > 0) {
+          const resolver = pick(staff);
+          const resolvedDate = randomPastDate(30); // Resolved within last 30 days
+          complaintData.resolved_by = resolver._id;
+          complaintData.resolved_at = resolvedDate;
+          complaintData.resolution_note = `Issue has been resolved. Completed by ${resolver.name}.`;
+        }
+        
+        complaintsPerSitio.push(complaintData);
       }
     }
     await Complaint.insertMany(complaintsPerSitio);
@@ -91,14 +103,15 @@ const run = async () => {
         const resident = pick(residents);
         const sitio = pick(sitios);
         const category = pick(categories);
-        complaintsPerEmployee.push({
+        const status = randomStatus();
+        const complaintData: any = {
           resident_id: resident._id,
           title: `${category} (created by ${employee.user_type}) #${i + 1}`,
           category,
           date_of_report: randomPastDate(),
           complaint_content: `${category} recorded by staff/admin.`,
           attachments: [],
-          status: randomStatus(),
+          status,
           priority: randomPriority(),
           sitio_id: sitio._id,
           sitio_code: sitio.code,
@@ -106,7 +119,18 @@ const run = async () => {
           admin_id: employee._id,
           created_at: randomPastDate(),
           updated_at: new Date(),
-        });
+        };
+        
+        // If resolved, add resolution data
+        if (status === 'resolved' && staff.length > 0) {
+          const resolver = pick(staff);
+          const resolvedDate = randomPastDate(30); // Resolved within last 30 days
+          complaintData.resolved_by = resolver._id;
+          complaintData.resolved_at = resolvedDate;
+          complaintData.resolution_note = `Issue has been resolved. Completed by ${resolver.name}.`;
+        }
+        
+        complaintsPerEmployee.push(complaintData);
       }
     }
     if (complaintsPerEmployee.length) {

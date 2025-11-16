@@ -25,6 +25,9 @@ export interface Complaint {
   priority?: 'low' | 'medium' | 'high';
   sitio?: { _id?: string; code?: number; name?: string };
   resolution_note?: string;
+  resolved_by?: string;
+  resolved_at?: string;
+  resolution_image?: string;
   created_at: string;
   updated_at: string;
 }
@@ -71,6 +74,17 @@ export class ComplaintsService {
   async updateComplaint(id: string, payload: Partial<Complaint>): Promise<Complaint | undefined> {
     try {
       const res = await apiClient.put<Complaint>(`${this.baseUrl}/${id}`, payload);
+      return res.data;
+    } catch (error) {
+      return undefined;
+    }
+  }
+
+  async updateComplaintWithFile(id: string, formData: FormData): Promise<Complaint | undefined> {
+    try {
+      const res = await apiClient.put<Complaint>(`${this.baseUrl}/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       return res.data;
     } catch (error) {
       return undefined;

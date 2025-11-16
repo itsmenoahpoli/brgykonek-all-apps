@@ -1,0 +1,371 @@
+<app-dashboard-layout>
+  <div class="p-2 sm:p-4 lg:p-6">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-3 sm:mb-4 lg:mb-6 gap-3">
+      <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Permission Requests</h1>
+      <button 
+        class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded text-sm transition-colors duration-200 w-full sm:w-auto"
+        (click)="loadPermissionRequests()"
+      >
+        Refresh
+      </button>
+    </div>
+
+    <div class="bg-white rounded-lg shadow mb-4 lg:mb-6">
+      <div class="border-b border-gray-200">
+        <nav class="flex -mb-px">
+          <button
+            (click)="switchTab('pending')"
+            [class]="activeTab === 'pending' 
+              ? 'border-indigo-500 text-indigo-600' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+            class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-center"
+          >
+            Pending
+          </button>
+          <button
+            (click)="switchTab('approved')"
+            [class]="activeTab === 'approved' 
+              ? 'border-indigo-500 text-indigo-600' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+            class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-center"
+          >
+            Approved
+          </button>
+          <button
+            (click)="switchTab('rejected')"
+            [class]="activeTab === 'rejected' 
+              ? 'border-indigo-500 text-indigo-600' 
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+            class="flex-1 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-center"
+          >
+            Rejected
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="bg-white rounded-lg shadow p-8">
+      <div class="flex items-center justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <span class="ml-2">Loading permission requests...</span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && getFilteredRequests().length === 0" class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+      No {{ activeTab }} permission requests found.
+    </div>
+
+    <!-- Desktop Table View (hidden on mobile) -->
+    <div class="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+      <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <table class="w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested At</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr *ngFor="let request of getFilteredRequests()" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                      <span class="text-sm font-medium text-white">{{ getUserName(request.user_id).charAt(0).toUpperCase() }}</span>
+                    </div>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">{{ getUserName(request.user_id) }}</div>
+                    <div class="text-sm text-gray-500">{{ getUserEmail(request.user_id) }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900 max-w-xs truncate">{{ request.reason }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full border" 
+                      [class]="getStatusClass(request.status)">
+                  {{ request.status | titlecase }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ formatDate(request.created_at) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex flex-col space-y-1">
+                  <button 
+                    class="text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-2 py-1 rounded text-xs font-medium transition-colors"
+                    (click)="viewRequest(request)"
+                  >
+                    View Details
+                  </button>
+                  <ng-container *ngIf="request.status === 'pending'">
+                    <button 
+                      class="text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 px-2 py-1 rounded text-xs font-medium transition-colors"
+                      (click)="openReviewModal(request, 'approve')"
+                    >
+                      Approve
+                    </button>
+                    <button 
+                      class="text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-2 py-1 rounded text-xs font-medium transition-colors"
+                      (click)="openReviewModal(request, 'reject')"
+                    >
+                      Reject
+                    </button>
+                  </ng-container>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile Card View (visible on mobile and tablet) -->
+    <div class="lg:hidden space-y-3">
+      <div *ngFor="let request of getFilteredRequests()" class="bg-white rounded-lg shadow p-3">
+        <!-- Request Header -->
+        <div class="flex items-center space-x-3 mb-3">
+          <div class="flex-shrink-0 h-10 w-10">
+            <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+              <span class="text-sm font-medium text-white">{{ getUserName(request.user_id).charAt(0).toUpperCase() }}</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="text-base font-medium text-gray-900 truncate">{{ getUserName(request.user_id) }}</h3>
+            <p class="text-xs text-gray-500 truncate">{{ getUserEmail(request.user_id) }}</p>
+          </div>
+        </div>
+
+        <!-- Request Details -->
+        <div class="mb-3">
+          <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Reason</p>
+          <p class="text-sm text-gray-900">{{ request.reason }}</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</p>
+            <span class="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded-full border mt-1" 
+                  [class]="getStatusClass(request.status)">
+              {{ request.status | titlecase }}
+            </span>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Requested</p>
+            <p class="text-xs text-gray-900 mt-1">{{ formatDate(request.created_at) }}</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+          <button 
+            class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1.5 rounded text-xs font-medium transition-colors"
+            (click)="viewRequest(request)"
+          >
+            View Details
+          </button>
+          <ng-container *ngIf="request.status === 'pending'">
+            <div class="flex space-x-2">
+              <button 
+                class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 px-2 py-1.5 rounded text-xs font-medium transition-colors"
+                (click)="openReviewModal(request, 'approve')"
+              >
+                Approve
+              </button>
+              <button 
+                class="flex-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2 py-1.5 rounded text-xs font-medium transition-colors"
+                (click)="openReviewModal(request, 'reject')"
+              >
+                Reject
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <app-status-modal
+      [isVisible]="showSuccessModal"
+      [title]="successTitle"
+      [message]="successMessage"
+      (modalClosed)="onSuccessModalClosed()"
+    ></app-status-modal>
+
+    <!-- View Request Details Modal -->
+    <div *ngIf="showViewModal && selectedRequest" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" (click)="closeViewModal()">
+      <div class="relative top-2 sm:top-4 lg:top-20 mx-auto p-2 sm:p-4 lg:p-5 border w-[95%] sm:w-11/12 lg:w-3/4 xl:w-1/2 shadow-lg rounded-md bg-white max-h-[95vh] sm:max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+        <div class="mt-1 sm:mt-3">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 class="text-base sm:text-lg font-medium text-gray-900">Permission Request Details</h3>
+            <button 
+              class="text-gray-400 hover:text-gray-600 p-1"
+              (click)="closeViewModal()"
+            >
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- User Info -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">User Information</h4>
+              <div class="bg-gray-50 rounded-md p-3">
+                <p class="text-sm"><span class="font-medium">Name:</span> {{ getUserName(selectedRequest.user_id) }}</p>
+                <p class="text-sm"><span class="font-medium">Email:</span> {{ getUserEmail(selectedRequest.user_id) }}</p>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Status</h4>
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full border" 
+                    [class]="getStatusClass(selectedRequest.status)">
+                {{ selectedRequest.status | titlecase }}
+              </span>
+            </div>
+
+            <!-- Reason -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Reason for Request</h4>
+              <div class="bg-gray-50 rounded-md p-3">
+                <p class="text-sm text-gray-900">{{ selectedRequest.reason }}</p>
+              </div>
+            </div>
+
+            <!-- Current Values -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Current Values</h4>
+              <div class="bg-gray-50 rounded-md p-3">
+                <div class="space-y-1">
+                  <div *ngFor="let key of Object.keys(selectedRequest.current_value || {})" class="text-sm">
+                    <span class="font-medium">{{ key }}:</span> {{ selectedRequest.current_value[key] || '-' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Requested Changes -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Requested Changes</h4>
+              <div class="bg-gray-50 rounded-md p-3">
+                <div class="space-y-1">
+                  <div *ngFor="let key of Object.keys(selectedRequest.request_change_value || {})" class="text-sm">
+                    <span class="font-medium">{{ key }}:</span> {{ selectedRequest.request_change_value[key] || '-' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Review Info (if reviewed) -->
+            <div *ngIf="selectedRequest.status !== 'pending'">
+              <h4 class="text-sm font-medium text-gray-700 mb-2">Review Information</h4>
+              <div class="bg-gray-50 rounded-md p-3 space-y-2">
+                <p class="text-sm" *ngIf="selectedRequest.reviewed_by">
+                  <span class="font-medium">Reviewed By:</span> {{ getUserName(selectedRequest.reviewed_by) }}
+                </p>
+                <p class="text-sm" *ngIf="selectedRequest.reviewed_at">
+                  <span class="font-medium">Reviewed At:</span> {{ formatDate(selectedRequest.reviewed_at) }}
+                </p>
+                <p class="text-sm" *ngIf="selectedRequest.review_notes">
+                  <span class="font-medium">Review Notes:</span> {{ selectedRequest.review_notes }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Timestamps -->
+            <div class="grid grid-cols-2 gap-4 text-sm text-gray-500">
+              <div>
+                <span class="font-medium">Created:</span> {{ formatDate(selectedRequest.created_at) }}
+              </div>
+              <div>
+                <span class="font-medium">Updated:</span> {{ formatDate(selectedRequest.updated_at) }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-end">
+            <button
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              (click)="closeViewModal()"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Modal -->
+    <div *ngIf="showReviewModal && requestToReview" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" (click)="closeReviewModal()">
+      <div class="relative top-2 sm:top-4 lg:top-20 mx-auto p-2 sm:p-4 lg:p-5 border w-[95%] sm:w-11/12 lg:w-1/2 shadow-lg rounded-md bg-white max-h-[95vh] sm:max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+        <div class="mt-1 sm:mt-3">
+          <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <h3 class="text-base sm:text-lg font-medium text-gray-900">
+              {{ reviewAction === 'approve' ? 'Approve' : 'Reject' }} Permission Request
+            </h3>
+            <button 
+              class="text-gray-400 hover:text-gray-600 p-1"
+              (click)="closeReviewModal()"
+            >
+              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm text-gray-700 mb-2">
+                <span class="font-medium">User:</span> {{ getUserName(requestToReview.user_id) }}
+              </p>
+              <p class="text-sm text-gray-700 mb-4">
+                <span class="font-medium">Reason:</span> {{ requestToReview.reason }}
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Review Notes {{ reviewAction === 'reject' ? '(Required)' : '(Optional)' }}
+              </label>
+              <textarea
+                [(ngModel)]="reviewNotes"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                rows="4"
+                [placeholder]="reviewAction === 'approve' ? 'Add any notes about this approval...' : 'Please provide a reason for rejection...'"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end space-x-3">
+            <button
+              class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+              (click)="closeReviewModal()"
+            >
+              Cancel
+            </button>
+            <button
+              [class]="reviewAction === 'approve' 
+                ? 'px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors' 
+                : 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors'"
+              (click)="submitReview()"
+              [disabled]="reviewAction === 'reject' && !reviewNotes.trim()"
+            >
+              {{ reviewAction === 'approve' ? 'Approve' : 'Reject' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-dashboard-layout>
+

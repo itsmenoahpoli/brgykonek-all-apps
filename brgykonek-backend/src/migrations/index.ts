@@ -227,6 +227,9 @@ const migrations: Migration[] = [
         "Flooding during heavy rain.",
         "Other miscellaneous complaint.",
       ];
+      // Get admin/staff users for resolved_by field
+      const adminUsers = await User.find({ user_type: { $in: ['admin', 'staff'] } }).select('_id name');
+      
       let complaints = [];
       for (let i = 0; i < 30; i++) {
         const category = complaintCategories[i % complaintCategories.length];
@@ -243,7 +246,8 @@ const migrations: Migration[] = [
           if (mod === 1) return "medium";
           return "high";
         })();
-        complaints.push({
+        
+        const complaintData: any = {
           resident_id: createdResidents[i % createdResidents.length]._id,
           title: `${category} Issue #${i + 1}`,
           category,
@@ -254,7 +258,18 @@ const migrations: Migration[] = [
           attachments: [],
           status,
           priority,
-        });
+        };
+        
+        // If resolved, add resolution data
+        if (status === "resolved" && adminUsers.length > 0) {
+          const resolver = adminUsers[i % adminUsers.length];
+          const resolvedDate = new Date(Date.now() - (i % 30) * 86400000);
+          complaintData.resolved_by = resolver._id;
+          complaintData.resolved_at = resolvedDate;
+          complaintData.resolution_note = `Issue has been resolved. Completed by ${resolver.name}.`;
+        }
+        
+        complaints.push(complaintData);
       }
       await Complaint.insertMany(complaints);
       await Announcement.insertMany(announcements);

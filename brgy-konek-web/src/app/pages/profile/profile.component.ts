@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { DashboardLayoutComponent } from '../../components/shared/dashboard-layout/dashboard-layout.component';
 import { AuthService, User } from '../../services/auth.service';
 import { StatusModalComponent } from '../../components/shared/status-modal/status-modal.component';
+import { PermissionRequestService } from '../../services/permission-request.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DashboardLayoutComponent, StatusModalComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DashboardLayoutComponent, StatusModalComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],
 })
@@ -23,8 +25,15 @@ export class ProfileComponent implements OnInit {
   passwordError = '';
   passwordSuccess = false;
   showValidationAlert = false;
+  showPermissionWarningModal = false;
+  permissionReason = '';
+  permissionRequestSuccess = false;
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private permissionRequestService: PermissionRequestService
+  ) {
     this.initializeForms();
   }
 
@@ -88,6 +97,17 @@ export class ProfileComponent implements OnInit {
     
     this.showValidationAlert = false;
 
+    // Check if user is resident - show warning modal
+    if (this.user?.role === 'resident') {
+      this.showPermissionWarningModal = true;
+      return;
+    }
+
+    // For admin/staff, proceed with save directly
+    this.proceedWithSave();
+  }
+
+  proceedWithSave(): void {
     console.log('Form is valid, proceeding with save...');
     console.log('Form value:', this.profileForm.value);
     
@@ -123,6 +143,65 @@ export class ProfileComponent implements OnInit {
         this.profileError = error.message || 'Failed to update profile';
       }
     });
+  }
+
+  async onPermissionWarningConfirm(): Promise<void> {
+    if (!this.permissionReason || this.permissionReason.trim() === '') {
+      return;
+    }
+
+    if (!this.user?.id) {
+      this.profileError = 'User not found';
+      return;
+    }
+
+    this.isSavingProfile = true;
+    this.profileError = '';
+
+    // Get current values from user
+    const currentValue = {
+      name: this.user.firstName || '',
+      mobile_number: this.user.phone || '',
+      address_sitio: this.user.sitio || '',
+      address_municipality: this.user.city || '',
+      address_province: this.user.province || '',
+    };
+
+    // Get requested changes from form
+    const formValue = this.profileForm.value;
+    const requestChangeValue = {
+      name: formValue.fullName.trim(),
+      mobile_number: formValue.phone,
+      address_sitio: formValue.sitio,
+      address_municipality: formValue.municipality,
+      address_province: formValue.province,
+    };
+
+    try {
+      const result = await this.permissionRequestService.createPermissionRequest({
+        current_value: currentValue,
+        request_change_value: requestChangeValue,
+        reason: this.permissionReason.trim(),
+      });
+
+      if (result) {
+        this.showPermissionWarningModal = false;
+        this.permissionReason = '';
+        this.permissionRequestSuccess = true;
+        this.profileError = '';
+      } else {
+        this.profileError = 'Failed to submit permission request. Please try again.';
+      }
+    } catch (error: any) {
+      this.profileError = error.message || 'Failed to submit permission request. Please try again.';
+    } finally {
+      this.isSavingProfile = false;
+    }
+  }
+
+  onPermissionWarningCancel(): void {
+    this.showPermissionWarningModal = false;
+    this.permissionReason = '';
   }
 
   changePassword(): void {
@@ -167,6 +246,10 @@ export class ProfileComponent implements OnInit {
 
   onPasswordSuccessClosed(): void {
     this.passwordSuccess = false;
+  }
+
+  onPermissionRequestSuccessClosed(): void {
+    this.permissionRequestSuccess = false;
   }
 
   onButtonClick(): void {

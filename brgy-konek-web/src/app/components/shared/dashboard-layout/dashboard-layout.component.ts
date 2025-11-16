@@ -96,6 +96,11 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
           route: 'admin/notifications',
         },
         {
+          label: 'Permission Requests',
+          icon: 'heroClipboardDocumentCheck',
+          route: 'admin/permission-requests',
+        },
+        {
           label: 'Profile',
           icon: 'heroUser',
           route: 'admin/profile',

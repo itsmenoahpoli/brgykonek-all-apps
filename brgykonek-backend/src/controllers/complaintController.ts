@@ -38,9 +38,21 @@ export const getComplaintById = async (req: Request, res: Response) => {
 
 export const updateComplaint = async (req: Request, res: Response) => {
   try {
+    let data = { ...req.body };
+    
+    // Handle resolution_image file upload
+    if (req.file) {
+      data.resolution_image = req.file.path;
+    }
+    
+    // Handle FormData fields (they come as strings, need to parse if needed)
+    if (data.resolved_at && typeof data.resolved_at === 'string') {
+      // Already in ISO format, keep as is
+    }
+    
     const complaint = await complaintService.updateComplaint(
       req.params.id,
-      req.body
+      data
     );
     if (!complaint) return res.status(404).json({ error: "Not found" });
     res.status(200).json(complaint);

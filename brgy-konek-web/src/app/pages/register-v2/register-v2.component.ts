@@ -225,6 +225,10 @@ export class RegisterV2Component {
     this.router.navigate(['/login']);
   }
 
+  goToLanding(): void {
+    this.router.navigate(['/']);
+  }
+
   onDragOver(event: DragEvent): void {
     event.preventDefault();
     event.stopPropagation();

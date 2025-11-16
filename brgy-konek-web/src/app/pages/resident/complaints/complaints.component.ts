@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardLayoutComponent } from '../../../components/shared/dashboard-layout/dashboard-layout.component';
@@ -42,7 +42,7 @@ export class ComplaintsComponent {
   complaintLocation = '';
   complaintContent = '';
   complaintStatus = 'pending';
-  complaintPriority: 'low' | 'medium' | 'high' = 'low';
+  complaintPriority: 'low' | 'medium' | 'high' = 'medium';
   complaintSitio: number | null = null;
   showDeleteModal = false;
   complaintToDelete: Complaint | null = null;
@@ -51,6 +51,7 @@ export class ComplaintsComponent {
   showSuccessModal = false;
   successTitle = '';
   successMessage = '';
+  isRefreshing = false;
 
   formErrors = {
     title: '',
@@ -62,8 +63,10 @@ export class ComplaintsComponent {
 
   constructor(
     private complaintsService: ComplaintsService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
   ) {
+    this.complaintDate = this.getTodayDateString();
     this.loadComplaints();
   }
 
@@ -71,7 +74,19 @@ export class ComplaintsComponent {
     const data = await this.complaintsService.getComplaintsByResidentId(
       this.authService
     );
-    this.complaints = data || [];
+    // Create a new array reference to ensure change detection
+    this.complaints = [...(data || [])];
+    this.cdr.detectChanges();
+  }
+
+  async refreshComplaints() {
+    this.isRefreshing = true;
+    try {
+      await this.loadComplaints();
+    } finally {
+      this.isRefreshing = false;
+      this.cdr.detectChanges();
+    }
   }
 
   get filteredComplaints() {
@@ -82,15 +97,32 @@ export class ComplaintsComponent {
     );
   }
 
+  getTodayDateString(): string {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
   onCreateComplaint() {
     this.showCreateModal = true;
     this.uploadedFiles = [];
     this.isDragOver = false;
+    this.complaintDate = this.getTodayDateString();
   }
   closeCreateModal() {
     this.showCreateModal = false;
     this.uploadedFiles = [];
     this.isDragOver = false;
+    this.complaintTitle = '';
+    this.complaintCategory = '';
+    this.complaintDate = this.getTodayDateString();
+    this.complaintLocation = '';
+    this.complaintContent = '';
+    this.complaintPriority = 'medium';
+    this.complaintSitio = null;
+    this.isFormSubmitted = false;
   }
   onFileInputChange(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -202,7 +234,8 @@ export class ComplaintsComponent {
     formData.append('resident_id', user.id);
     formData.append('title', this.complaintTitle);
     formData.append('category', this.complaintCategory);
-    formData.append('date_of_report', new Date(this.complaintDate).toISOString());
+    // Use current date and time instead of just the date string to preserve actual time
+    formData.append('date_of_report', new Date().toISOString());
     formData.append('location_of_incident', this.complaintLocation);
     formData.append('complaint_content', this.complaintContent);
     formData.append('status', this.complaintStatus);

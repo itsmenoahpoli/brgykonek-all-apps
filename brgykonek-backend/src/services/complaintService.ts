@@ -130,6 +130,7 @@ export const getComplaints = async (filter: FilterQuery<Document> = {}) => {
     .sort({ created_at: -1 })
     .populate("resident_id")
     .populate("sitio_id")
+    .populate("resolved_by")
     .lean();
   return items.map((c: any) => ({
     ...c,
@@ -141,6 +142,7 @@ export const getComplaintById = async (id: string) => {
   const c: any = await Complaint.findById(id)
     .populate("resident_id")
     .populate("sitio_id")
+    .populate("resolved_by")
     .lean();
   if (!c) return c;
   return {
@@ -168,6 +170,7 @@ export const updateComplaint = async (
   const populated: any = await Complaint.findById(id)
     .populate("resident_id")
     .populate("sitio_id")
+    .populate("resolved_by")
     .lean();
   return populated ? {
     ...populated,
@@ -183,6 +186,7 @@ export const getComplaintsByResidentId = async (resident_id: string) => {
   const items = await Complaint.find({ resident_id })
     .sort({ created_at: -1 })
     .populate("sitio_id")
+    .populate("resolved_by")
     .lean();
   return items.map((c: any) => ({
     ...c,

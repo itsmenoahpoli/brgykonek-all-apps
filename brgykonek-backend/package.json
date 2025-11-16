@@ -12,6 +12,7 @@
     "migrate:rollback": "ts-node src/migrations/index.ts rollback",
     "seed:sitios:clear-complaints": "ts-node src/migrations/clear-complaints-and-seed-sitios.ts",
     "seed:complaints": "ts-node src/migrations/seed-complaints.ts",
+    "seed:permission-requests": "ts-node src/migrations/seed-permission-requests.ts",
     "reset:db:users": "ts-node src/scripts/reset-db-and-seed-users.ts"
   },
   "keywords": [

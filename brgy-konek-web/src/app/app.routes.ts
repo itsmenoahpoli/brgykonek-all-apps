@@ -107,6 +107,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'admin/permission-requests',
+    loadComponent: () =>
+      import('./pages/admin/permission-requests/permission-requests.component').then(
+        (m) => m.PermissionRequestsComponent
+      ),
+  },
+  {
     path: 'resident/home',
     loadComponent: () =>
       import('./pages/resident/home/home.component').then(
